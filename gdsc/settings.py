@@ -77,12 +77,12 @@ WSGI_APPLICATION = 'gdsc.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'gdsc',
-        'USER': 'root',
-        'PASSWORD': '12345',
-        'HOST': 'localhost',   
-        'PORT': '3306',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
