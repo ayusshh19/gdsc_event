@@ -1,4 +1,3 @@
-web: gunicorn ayush.wsgi
-release: python manage.py makemigrations --noinput
-release: python manage.py collectstatic --noinput
-release: python manage.py migrate --noinput
+web: gunicorn django_project.wsgi:application --log-file - --log-level debug
+python manage.py collectstatic --noinput
+manage.py migrate
