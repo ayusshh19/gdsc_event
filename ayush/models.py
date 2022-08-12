@@ -1,4 +1,4 @@
-from tkinter import Place
+
 from django.db import models
 
 # Create your models here.
