@@ -1,1 +1,1 @@
-web: gunicorn ayush.wsgi --log-file -
+web: gunicorn gdsc.wsgi --log-file -
