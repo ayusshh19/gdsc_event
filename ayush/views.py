@@ -1,20 +1,23 @@
 from functools import partial
 import stat
+from unicodedata import category
 from django.shortcuts import render
 from rest_framework.response import Response
 from django.db.models import Q
 from .serializers import Eventserializer
 from .models import Eventmanage
-from rest_framework import status
-from rest_framework.views import APIView
+from rest_framework import status,viewsets
+
 # Create your views here.
 
-class home(APIView):
-    def get(self,request):
+class home(viewsets.ModelViewSet):
+    queryset=Eventmanage.objects.all()
+    serializer_class=Eventserializer
+    def list(self,request):
         return Response({'aboutus':{'msg':'Welcome user this is ayush event manager here you can add retrieve and update your event data and you can info related about your requested event '},'aboutlinks':{'/':'main page where you can add events','/event':'to get all the events','/event/type or place (category)':'To search particular event with category or place','/updateevent':'To update event','/updateevent/event id':'search particular event id and update','deleteevent/<int:id>':'delete particular event'},'how to add event':{'eventcraete':{'name':'eventname','type':'eventtype','Place':'eventplace','date':'eventdate in format YYYY-MM-DD','time':'event time in format hour:min'}}},status=status.HTTP_200_OK)
 
-    
-    def post(self,request):
+
+    def create(self,request):
         print(request.data)
         creation=Eventserializer(data=request.data)
         if creation.is_valid():
@@ -23,8 +26,16 @@ class home(APIView):
         return Response({'msg':creation.errors},status=status.HTTP_403_FORBIDDEN)
     
 
-class Eventhandle(APIView):
-    def get(self,request,category=None):
+class Eventhandle(viewsets.ViewSet):
+    queryset=Eventmanage.objects.all()
+    serializer_class=Eventserializer
+    def list(self,request,category=None):
+        allevent=Eventmanage.objects.all()
+        serializer=Eventserializer(allevent,many=True)
+        return Response({'msg':'To search event by category enter category or place name in url!!!','data':serializer.data},status=status.HTTP_302_FOUND)
+    
+    def retrieve(self, request,*args, **kwargs):
+        category=kwargs['pk']
         if category is not None:
             try:
                 partevent=Eventmanage.objects.filter(Q(type=category)|Q(Place=category))
@@ -34,12 +45,11 @@ class Eventhandle(APIView):
                 event=Eventmanage.objects.all()
                 serializer=Eventserializer(event,many=True)
                 return Response({'msg':'pls check category or place carefully','select category or place from ':serializer.data},status=status.HTTP_302_FOUND)
-        allevent=Eventmanage.objects.all()
-        serializer=Eventserializer(allevent,many=True)
-        return Response({'msg':'To search event by category enter category or place name in url!!!','data':serializer.data},status=status.HTTP_302_FOUND)
     
-class Editevent(APIView):
-    def get(self,request,id=None):
+class Editevent(viewsets.ViewSet):
+    queryset=Eventmanage.objects.all()
+    serializer_class=Eventserializer
+    def list(self,request,id=None):
         if id is not None:
             try:
                 editableevent=Eventmanage.objects.get(id=id)
@@ -53,7 +63,20 @@ class Editevent(APIView):
         serializer=Eventserializer(event,many=True)
         return Response({'msg':'To search event by category enter category or place name in url!!!','data':serializer.data},status=status.HTTP_302_FOUND)
     
-    def put(self,request,id=None):
+    def retrieve(self, request, *args, **kwargs):
+        id=kwargs['pk']
+        if id is not None:
+            try:
+                editableevent=Eventmanage.objects.get(id=id)
+                serializer=Eventserializer(editableevent)
+                return Response({'msg':serializer.data},status=status.HTTP_202_ACCEPTED)
+            except:
+                event=Eventmanage.objects.all()
+                serializer=Eventserializer(event,many=True)
+                return Response({'msg':'pls check id carefully','select id from ':serializer.data},status=status.HTTP_302_FOUND)
+    
+    def update(self,request,*args, **kwargs):
+        id=kwargs['pk']
         if id is not None:
             try:
                 editableevent=Eventmanage.objects.get(id=id)
@@ -67,7 +90,8 @@ class Editevent(APIView):
                 serializer=Eventserializer(event,many=True)
                 return Response({'msg':'pls check id carefully','select id from ':serializer.data},status=status.HTTP_302_FOUND)
 
-    def patch(self,request,id=None):
+    def partial_update(self,request,*args, **kwargs):
+        id=kwargs['pk']
         if id is not None:
             try:
                 editableevent=Eventmanage.objects.get(id=id)
@@ -81,8 +105,10 @@ class Editevent(APIView):
                 serializer=Eventserializer(event,many=True)
                 return Response({'msg':'pls check id carefully','select id from ':serializer.data},status=status.HTTP_302_FOUND)
         
-class Deleteevent(APIView):
-    def get(self,request,id=None):
+class Deleteevent(viewsets.ModelViewSet):
+    queryset=Eventmanage.objects.all()
+    serializer_class=Eventserializer
+    def list(self,request,id=None):
         if id is not None:
             try:
                 editableevent=Eventmanage.objects.get(id=id)
@@ -96,7 +122,8 @@ class Deleteevent(APIView):
         serializer=Eventserializer(event,many=True)
         return Response({'msg':'To search event by category enter category or place name in url!!!','data':serializer.data},status=status.HTTP_302_FOUND)
         
-    def delete(self,request,id):
+    def destroy(self,request,*args, **kwargs):
+        id=kwargs['pk']
         try:
             delevent=Eventmanage.objects.filter(id=id)
             delevent.delete()

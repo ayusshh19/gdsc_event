@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django.urls import path,include
 from .views import Eventhandle,home,Editevent,Deleteevent
+from rest_framework.routers import DefaultRouter
+
+router=DefaultRouter()
+router.register('home',home,basename='home')
+router.register('event',Eventhandle,basename='allevent')
+router.register('updateevent',Editevent,basename='update')
+router.register('deleteevent',Deleteevent,basename='delete')
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',home.as_view(),name='home'),
-    path('event/',Eventhandle.as_view(),name='allevent'),
-    path('event/<str:category>',Eventhandle.as_view(),name='partevent'),
-    path('updateevent',Editevent.as_view(),name='update'),
-    path('updateevent/<int:id>',Editevent.as_view(),name='updateid'),
-    path('deleteevent',Deleteevent.as_view(),name='delete'),
-    path('deleteevent/<int:id>',Deleteevent.as_view(),name='deleteid')
-    
+    path('',include(router.urls)),
 ]
